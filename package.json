@@ -1,0 +1,13 @@
+{
+  "name": "deltaforce-manufacture-ranker",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "install:all": "npm --prefix backend install --no-audit --no-fund --registry=https://registry.npmmirror.com --cache .\\.npm-cache && npm --prefix frontend install --no-audit --no-fund --registry=https://registry.npmmirror.com --cache .\\.npm-cache",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "typecheck": "npm --prefix backend run typecheck && npm --prefix frontend run typecheck"
+  }
+}
