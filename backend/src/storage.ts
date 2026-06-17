@@ -61,7 +61,8 @@ export class CloudBaseStorageAdapter implements ObjectStorage {
   async readJson<T>(key: string): Promise<T | null> {
     try {
       const result = await this.db.collection(this.collectionName).doc(this.docId(key)).get();
-      const doc = result.data?.[0] as CacheDoc<T> | undefined;
+      const data = result.data as CacheDoc<T>[] | CacheDoc<T> | undefined;
+      const doc = Array.isArray(data) ? data[0] : data;
       return doc?.value ?? null;
     } catch (error) {
       const message = String((error as Error).message || error);
@@ -81,7 +82,11 @@ export class CloudBaseStorageAdapter implements ObjectStorage {
     try {
       await ref.set(doc);
     } catch {
-      await ref.update(doc);
+      await ref.update({
+        key: doc.key,
+        value: doc.value,
+        updatedAt: doc.updatedAt,
+      });
     }
   }
 
