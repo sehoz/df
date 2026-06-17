@@ -250,10 +250,19 @@ export class RefreshService {
         if (item.status === 'fulfilled') rows.push(...item.value);
         else errors.push(item.reason?.message || String(item.reason));
       }
-      const assets = await hydrateAssets(rows, this.client, this.storage).catch((error) => {
-        errors.push(`assets: ${error.message || error}`);
-        return { assets: {} } as ItemAssetCache;
-      });
+      if (rows.length === 0) {
+        throw new Error(errors.join('; ') || 'No manufacture data returned');
+      }
+      const assets = await loadAssetCache(this.storage).catch(() => ({
+        updatedAt: 0,
+        catalogScanned: false,
+        assets: {},
+      } as ItemAssetCache));
+      for (const row of rows) {
+        const asset = lookupAsset(assets, row);
+        row.iconUrl = asset?.localIconUrl || asset?.iconUrl || row.iconUrl || '';
+        row.qualityKey = row.qualityKey || asset?.qualityKey || '';
+      }
       const sorted = sortRows(rows, 'hourly_desc').map((row) => ({ ...row, updatedAt: now }));
       const data: RankingsCache = {
         updatedAt: now,

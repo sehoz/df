@@ -26,7 +26,7 @@ export class DeltaforceClient {
       throw new Error('DF_API_TOKEN is not configured');
     }
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 15000);
+    const timeout = setTimeout(() => controller.abort(), this.options.timeoutMs ?? 8000);
     try {
       const response = await fetch(this.buildUrl(pathname, params), {
         headers: {
