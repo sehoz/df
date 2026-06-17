@@ -1,4 +1,4 @@
-name: Deploy to Tencent Cloud
+name: Deploy to CloudBase
 
 on:
   push:
@@ -9,10 +9,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    env:
-      DF_API_BASE_URL: https://orzice.com/workApi
-      REFRESH_COOLDOWN_MS: "600000"
-      STORAGE_MODE: cos
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -36,48 +32,19 @@ jobs:
         env:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
 
-      - name: Configure Tencent Cloud CLI
-        run: |
-          pip install coscmd tccli
-          tccli configure set secretId "$TENCENT_SECRET_ID"
-          tccli configure set secretKey "$TENCENT_SECRET_KEY"
-          tccli configure set region "$TENCENT_REGION"
-          coscmd config -a "$TENCENT_SECRET_ID" -s "$TENCENT_SECRET_KEY" -b "$COS_BUCKET" -r "$COS_REGION"
+      - name: Install CloudBase CLI
+        run: npm install -g @cloudbase/cli
+
+      - name: Deploy backend function
+        run: tcb fn deploy df-api --dir backend --force --envId "$TCB_ENV_ID" --secretId "$TENCENT_SECRET_ID" --secretKey "$TENCENT_SECRET_KEY"
         env:
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
           TENCENT_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENT_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
-          TENCENT_REGION: ${{ secrets.TENCENT_REGION }}
-          COS_BUCKET: ${{ secrets.COS_BUCKET }}
-          COS_REGION: ${{ secrets.COS_REGION }}
 
-      - name: Upload frontend to COS
-        run: coscmd upload -rfs --delete frontend/dist/ /
-
-      - name: Package API
-        run: |
-          mkdir -p deploy/api
-          cp -r backend/dist deploy/api/dist
-          cp backend/package.json deploy/api/
-          cp -r backend/node_modules deploy/api/node_modules
-          cd deploy/api
-          zip -r ../api.zip .
-
-      - name: Upload API package to COS
-        run: coscmd upload -rs --delete deploy/api.zip "$SCF_CODE_OBJECT"
+      - name: Deploy frontend hosting
+        run: tcb hosting deploy frontend/dist / --envId "$TCB_ENV_ID" --secretId "$TENCENT_SECRET_ID" --secretKey "$TENCENT_SECRET_KEY"
         env:
-          SCF_CODE_OBJECT: ${{ secrets.SCF_CODE_OBJECT }}
-
-      - name: Update SCF code
-        run: |
-          tccli scf UpdateFunctionCode \
-            --FunctionName "$SCF_FUNCTION_NAME" \
-            --Handler "dist/index.main_handler" \
-            --Runtime "Nodejs20.0" \
-            --CosBucketName "$SCF_CODE_BUCKET" \
-            --CosBucketRegion "$COS_REGION" \
-            --CosObjectName "$SCF_CODE_OBJECT"
-        env:
-          SCF_FUNCTION_NAME: ${{ secrets.SCF_FUNCTION_NAME }}
-          SCF_CODE_BUCKET: ${{ secrets.SCF_CODE_BUCKET }}
-          SCF_CODE_OBJECT: ${{ secrets.SCF_CODE_OBJECT }}
-          COS_REGION: ${{ secrets.COS_REGION }}
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
+          TENCENT_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
+          TENCENT_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}

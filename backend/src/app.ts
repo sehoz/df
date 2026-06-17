@@ -3,12 +3,12 @@ import { cors } from 'hono/cors';
 import { loadConfig } from './config.js';
 import { DeltaforceClient } from './deltaforce-client.js';
 import { RefreshService } from './refresh-service.js';
-import { CosStorageAdapter, LocalStorageAdapter } from './storage.js';
+import { CloudBaseStorageAdapter, LocalStorageAdapter } from './storage.js';
 
 export function createApp() {
   const config = loadConfig();
-  const storage = config.storageMode === 'cos'
-    ? new CosStorageAdapter()
+  const storage = config.storageMode === 'cloudbase'
+    ? new CloudBaseStorageAdapter()
     : new LocalStorageAdapter(config.localDataDir, config.publicAssetBaseUrl);
   const client = new DeltaforceClient({
     baseUrl: config.apiBaseUrl,

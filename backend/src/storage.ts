@@ -1,6 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import COS from 'cos-nodejs-sdk-v5';
+import cloudbase from '@cloudbase/node-sdk';
 
 export interface ObjectStorage {
   readJson<T>(key: string): Promise<T | null>;
@@ -40,62 +40,60 @@ export class LocalStorageAdapter implements ObjectStorage {
   }
 }
 
-export class CosStorageAdapter implements ObjectStorage {
-  private readonly cos: COS;
-  private readonly bucket: string;
-  private readonly region: string;
-  private readonly publicBaseUrl: string;
+interface CacheDoc<T> {
+  _id: string;
+  key: string;
+  value: T;
+  updatedAt: number;
+}
 
-  constructor() {
-    const SecretId = process.env.TENCENT_SECRET_ID || '';
-    const SecretKey = process.env.TENCENT_SECRET_KEY || '';
-    this.bucket = process.env.COS_BUCKET || '';
-    this.region = process.env.COS_REGION || '';
-    this.publicBaseUrl = process.env.COS_PUBLIC_BASE_URL || '';
-    if (!SecretId || !SecretKey || !this.bucket || !this.region) {
-      throw new Error('COS storage requires TENCENT_SECRET_ID, TENCENT_SECRET_KEY, COS_BUCKET and COS_REGION');
-    }
-    this.cos = new COS({ SecretId, SecretKey });
+export class CloudBaseStorageAdapter implements ObjectStorage {
+  private readonly app = cloudbase.init({
+    env: process.env.TCB_ENV_ID || process.env.SCF_NAMESPACE,
+  });
+  private readonly db = this.app.database();
+  private readonly collectionName = process.env.TCB_CACHE_COLLECTION || 'df_cache';
+
+  private docId(key: string) {
+    return key.replace(/[^a-zA-Z0-9_-]/g, '_');
   }
 
   async readJson<T>(key: string): Promise<T | null> {
     try {
-      const result = await this.cos.getObject({
-        Bucket: this.bucket,
-        Region: this.region,
-        Key: key,
-      });
-      const body = Buffer.isBuffer(result.Body)
-        ? result.Body.toString('utf8')
-        : String(result.Body || '');
-      return JSON.parse(body) as T;
+      const result = await this.db.collection(this.collectionName).doc(this.docId(key)).get();
+      const doc = result.data?.[0] as CacheDoc<T> | undefined;
+      return doc?.value ?? null;
     } catch (error) {
-      const statusCode = (error as { statusCode?: number }).statusCode;
-      if (statusCode === 404) return null;
+      const message = String((error as Error).message || error);
+      if (message.includes('document does not exist') || message.includes('does not exist')) return null;
       throw error;
     }
   }
 
   async writeJson<T>(key: string, value: T): Promise<void> {
-    await this.cos.putObject({
-      Bucket: this.bucket,
-      Region: this.region,
-      Key: key,
-      Body: Buffer.from(`${JSON.stringify(value, null, 2)}\n`, 'utf8'),
-      ContentType: 'application/json; charset=utf-8',
-    });
+    const doc = {
+      _id: this.docId(key),
+      key,
+      value,
+      updatedAt: Date.now(),
+    };
+    const ref = this.db.collection(this.collectionName).doc(doc._id);
+    try {
+      await ref.set(doc);
+    } catch {
+      await ref.update(doc);
+    }
   }
 
   async writeBytes(key: string, bytes: Uint8Array, contentType: string): Promise<string> {
-    await this.cos.putObject({
-      Bucket: this.bucket,
-      Region: this.region,
-      Key: key,
-      Body: Buffer.from(bytes),
-      ContentType: contentType,
+    const cloudPath = key.replaceAll('\\', '/');
+    void contentType;
+    const upload = await this.app.uploadFile({
+      cloudPath,
+      fileContent: Buffer.from(bytes),
     });
-    return this.publicBaseUrl
-      ? `${this.publicBaseUrl.replace(/\/$/, '')}/${key}`
-      : `https://${this.bucket}.cos.${this.region}.myqcloud.com/${key}`;
+    const fileID = upload.fileID;
+    const urls = await this.app.getTempFileURL({ fileList: [fileID] });
+    return urls.fileList?.[0]?.tempFileURL || fileID;
   }
 }

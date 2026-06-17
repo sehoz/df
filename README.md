@@ -1,11 +1,16 @@
 # 三角洲特勤处收益排行
 
-项目现在只分为两个主目录：
+项目只保留两个主目录：
 
 - `frontend`: Vite + React + TypeScript PWA 前端。
-- `backend`: Hono + TypeScript API，可部署到腾讯云 SCF/API Gateway。
+- `backend`: Hono + TypeScript 后端，部署为 CloudBase HTTP 云函数。
 
-旧版单体 `server.js`、`public`、`lib`、`packages` 已移除。
+部署目标是腾讯云 CloudBase：
+
+- 前端部署到 CloudBase 静态网站托管。
+- 后端部署到 CloudBase HTTP 云函数 `df-api`。
+- JSON 缓存放 CloudBase 数据库集合 `df_cache`。
+- 图标文件放 CloudBase 云存储。
 
 ## 本地开发
 
@@ -20,47 +25,45 @@ npm run dev:frontend
 
 ## API
 
-- `GET /api/status`: 读取缓存状态，不触发外部接口。
-- `GET /api/rankings`: 读取最新排行缓存，不触发外部接口。
-- `POST /api/refresh`: 所有用户可触发刷新；后端做全局冷却和刷新锁。
+- `GET /api/status`: 读取缓存状态，不调用外部接口。
+- `GET /api/rankings`: 读取最新排行缓存，不调用外部接口。
+- `POST /api/refresh`: 手动刷新。后端有全局冷却和刷新锁。
 
-默认冷却时间为 `600000` 毫秒。冷却期内刷新会直接返回缓存，不调用外部三角洲接口。
+默认冷却时间为 `600000` 毫秒。冷却期内刷新会直接返回缓存，不消耗三角洲数据帝接口额度。
 
-## 缓存文件
+## CloudBase 配置
 
-本地开发使用 `LOCAL_DATA_DIR`，生产使用 COS：
+云函数环境变量：
 
-- `cache/manufacture-latest.json`: 最新排行。
-- `cache/refresh-lock.json`: 刷新锁和最近刷新时间。
-- `cache/item-assets.json`: 物品图标、品质、COS 图标地址。
-- `assets/items/*`: 下载后的图标文件。
+```text
+DF_API_TOKEN=你的三角洲数据帝 token
+DF_API_BASE_URL=https://orzice.com/workApi
+REFRESH_COOLDOWN_MS=600000
+STORAGE_MODE=cloudbase
+TCB_ENV_ID=你的 CloudBase 环境 ID
+TCB_CACHE_COLLECTION=df_cache
+```
 
-## GitHub Push 自动部署
+GitHub Actions Secrets：
 
-`.github/workflows/deploy.yml` 会在 push 到 `main` 后：
+```text
+TCB_ENV_ID
+TENCENT_SECRET_ID
+TENCENT_SECRET_KEY
+VITE_API_BASE_URL
+```
 
-1. 分别安装 `backend` 和 `frontend` 依赖。
+`VITE_API_BASE_URL` 填 CloudBase HTTP 云函数的公网访问地址，例如：
+
+```text
+https://xxxx.service.tcloudbase.com/df-api
+```
+
+## 自动部署
+
+push 到 `main` 后，`.github/workflows/deploy.yml` 会：
+
+1. 安装前后端依赖。
 2. 构建后端和前端。
-3. 将 `frontend/dist` 同步到 COS 静态网站桶。
-4. 打包 `backend/dist` 和后端依赖，上传到 COS。
-5. 调用腾讯云 SCF `UpdateFunctionCode` 更新云函数代码。
-
-GitHub Secrets 需要配置：
-
-- `TENCENT_SECRET_ID`
-- `TENCENT_SECRET_KEY`
-- `TENCENT_REGION`
-- `COS_BUCKET`
-- `COS_REGION`
-- `SCF_FUNCTION_NAME`
-- `SCF_CODE_BUCKET`
-- `SCF_CODE_OBJECT`
-
-腾讯云侧需要预先创建：
-
-- 一个用于前端静态网站和缓存资源的 COS Bucket。
-- 一个用于存放 SCF 代码包的 COS Object 路径。
-- 一个 SCF 云函数，Handler 为 `dist/index.main_handler`。
-- 一个 API Gateway 触发器，将 `/api/*` 转发到该云函数。
-
-`DF_API_TOKEN` 等运行时环境变量需要在 SCF 函数环境变量中配置，不要放入 GitHub 仓库。
+3. 使用 CloudBase CLI 部署 `backend` 为云函数 `df-api`。
+4. 使用 CloudBase CLI 上传 `frontend/dist` 到静态网站托管。
