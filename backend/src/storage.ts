@@ -54,13 +54,9 @@ export class CloudBaseStorageAdapter implements ObjectStorage {
   private readonly db = this.app.database();
   private readonly collectionName = process.env.TCB_CACHE_COLLECTION || 'df_cache';
 
-  private docId(key: string) {
-    return key.replace(/[^a-zA-Z0-9_-]/g, '_');
-  }
-
   async readJson<T>(key: string): Promise<T | null> {
     try {
-      const result = await this.db.collection(this.collectionName).doc(this.docId(key)).get();
+      const result = await this.db.collection(this.collectionName).where({ key }).limit(1).get();
       const data = result.data as CacheDoc<T>[] | CacheDoc<T> | undefined;
       const doc = Array.isArray(data) ? data[0] : data;
       return doc?.value ?? null;
@@ -73,20 +69,18 @@ export class CloudBaseStorageAdapter implements ObjectStorage {
 
   async writeJson<T>(key: string, value: T): Promise<void> {
     const doc = {
-      _id: this.docId(key),
       key,
       value,
       updatedAt: Date.now(),
     };
-    const ref = this.db.collection(this.collectionName).doc(doc._id);
-    try {
-      await ref.set(doc);
-    } catch {
-      await ref.update({
-        key: doc.key,
-        value: doc.value,
-        updatedAt: doc.updatedAt,
-      });
+    const collection = this.db.collection(this.collectionName);
+    const existing = await collection.where({ key }).limit(1).get();
+    const data = existing.data as Array<{ _id?: string }> | undefined;
+    const id = Array.isArray(data) ? data[0]?._id : undefined;
+    if (id) {
+      await collection.doc(id).update(doc);
+    } else {
+      await collection.add(doc);
     }
   }
 
