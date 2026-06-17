@@ -19,10 +19,15 @@ function getPath(event: CloudBaseHttpEvent) {
 export const main_handler = async (event: CloudBaseHttpEvent, _context?: unknown) => {
   const method = event.httpMethod || 'GET';
   const path = getPath(event);
+  const body = method === 'GET' || method === 'HEAD'
+    ? undefined
+    : event.isBase64Encoded && event.body
+      ? Buffer.from(event.body, 'base64')
+      : event.body;
   const request = new Request(`https://scf.local${path}`, {
     method,
     headers: event.headers,
-    body: event.isBase64Encoded && event.body ? Buffer.from(event.body, 'base64') : event.body,
+    body,
   });
   const response = await app.fetch(request);
   return {

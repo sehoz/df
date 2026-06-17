@@ -1,4 +1,3 @@
-exports.main = async (event, context) => {
-  const mod = await import('./dist/index.js');
-  return mod.main_handler(event, context);
-};
+import { main_handler } from './dist/index.js';
+
+export const main = main_handler;
