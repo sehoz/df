@@ -1,4 +1,4 @@
-declare module 'cos-nodejs-sdk-v5' {
+﻿declare module 'cos-nodejs-sdk-v5' {
   interface CosOptions {
     SecretId: string;
     SecretKey: string;
@@ -18,3 +18,4 @@ declare module 'cos-nodejs-sdk-v5' {
     putObject(options: ObjectOptions): Promise<unknown>;
   }
 }
+

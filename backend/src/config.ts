@@ -1,4 +1,4 @@
-export interface ApiConfig {
+﻿export interface ApiConfig {
   apiBaseUrl: string;
   apiToken: string;
   refreshCooldownMs: number;
@@ -17,3 +17,4 @@ export function loadConfig(): ApiConfig {
     publicAssetBaseUrl: process.env.PUBLIC_ASSET_BASE_URL || '',
   };
 }
+

@@ -1,4 +1,4 @@
-import { createApp } from './app.js';
+﻿import { createApp } from './app';
 
 const app = createApp();
 
@@ -39,3 +39,4 @@ export const main_handler = async (event: CloudBaseHttpEvent, _context?: unknown
 };
 
 export default app;
+

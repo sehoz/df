@@ -1,3 +1,3 @@
-import { main_handler } from './dist/index.js';
+const { main_handler } = require('./dist/index.js');
 
-export const main = main_handler;
+exports.main = main_handler;

@@ -1,6 +1,6 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import path from 'node:path';
-import cloudbase from '@cloudbase/node-sdk';
+﻿import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import * as path from 'node:path';
+import * as cloudbase from '@cloudbase/node-sdk';
 
 export interface ObjectStorage {
   readJson<T>(key: string): Promise<T | null>;
@@ -97,3 +97,5 @@ export class CloudBaseStorageAdapter implements ObjectStorage {
     return urls.fileList?.[0]?.tempFileURL || fileID;
   }
 }
+
+

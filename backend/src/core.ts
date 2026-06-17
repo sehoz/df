@@ -1,4 +1,4 @@
-export type QualityKey = 'common' | 'green' | 'blue' | 'purple' | 'gold' | 'red' | '';
+﻿export type QualityKey = 'common' | 'green' | 'blue' | 'purple' | 'gold' | 'red' | '';
 
 export type StationId = 1 | 2 | 3 | 4;
 
@@ -110,7 +110,7 @@ export function round2(value: unknown): number {
 }
 
 export function stationName(type: unknown): string {
-  return STATION_NAMES[Number(type)] || `未知台${type}`;
+  return STATION_NAMES[Number(type)] || `鏈煡鍙?{type}`;
 }
 
 export function stationTypeName(type: unknown): string {
@@ -340,7 +340,7 @@ export function normalizeManufactureRow(rawValue: unknown, context: { station?: 
     recipeSource: 'inferred',
     ingredients: enrichedIngredients,
     source: raw,
-    note: '材料成本由售价、手续费和净利润反推',
+    note: '鏉愭枡鎴愭湰鐢卞敭浠枫€佹墜缁垂鍜屽噣鍒╂鼎鍙嶆帹',
   };
 }
 
@@ -373,3 +373,4 @@ export function summarizeRows(rows: ManufactureRow[]): DashboardStats {
     avgHourly: rows.length ? money(rows.reduce((sum, row) => sum + row.hourlyProfit, 0) / rows.length) : 0,
   };
 }
+

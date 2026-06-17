@@ -1,4 +1,4 @@
-import { normalizeManufactureRow, type ManufactureRow, type StationId } from './core.js';
+﻿import { normalizeManufactureRow, type ManufactureRow, type StationId } from './core';
 
 export interface DeltaforceClientOptions {
   baseUrl: string;
@@ -60,3 +60,4 @@ export class DeltaforceClient {
     return Array.isArray((result as { data?: unknown[] })?.data) ? (result as { data: unknown[] }).data : [];
   }
 }
+

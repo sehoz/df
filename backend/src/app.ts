@@ -1,9 +1,9 @@
-import { Hono } from 'hono';
+﻿import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import { loadConfig } from './config.js';
-import { DeltaforceClient } from './deltaforce-client.js';
-import { RefreshService } from './refresh-service.js';
-import { CloudBaseStorageAdapter, LocalStorageAdapter } from './storage.js';
+import { loadConfig } from './config';
+import { DeltaforceClient } from './deltaforce-client';
+import { RefreshService } from './refresh-service';
+import { CloudBaseStorageAdapter, LocalStorageAdapter } from './storage';
 
 export function createApp() {
   const config = loadConfig();
@@ -40,3 +40,4 @@ export function createApp() {
   app.onError((error, c) => c.json({ ok: false, error: error.message || String(error) }, 500));
   return app;
 }
+

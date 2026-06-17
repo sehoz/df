@@ -1,4 +1,4 @@
-import {
+﻿import {
   normalizeIconUrl,
   normalizeQuality,
   sortRows,
@@ -7,9 +7,9 @@ import {
   type ManufactureRow,
   type QualityKey,
   type StationId,
-} from './core.js';
-import type { DeltaforceClient } from './deltaforce-client.js';
-import type { ObjectStorage } from './storage.js';
+} from './core';
+import type { DeltaforceClient } from './deltaforce-client';
+import type { ObjectStorage } from './storage';
 
 export interface RankingsCache {
   updatedAt: number;
@@ -286,3 +286,4 @@ export class RefreshService {
     }
   }
 }
+
