@@ -34,7 +34,6 @@ interface RankingsResponse {
   rows?: ManufactureRow[];
   updatedAt?: number;
   errors?: string[];
-  source?: { manufactureCount: number; stationCount: number; assetCount: number };
   error?: string;
   refreshed?: boolean;
   coolingDown?: boolean;
@@ -47,6 +46,14 @@ const sortLabels: Record<SortKey, string> = {
   outputNetValue: '总产出',
   hourlyOutputValue: '每小时产出',
 };
+
+const stationOptions = [
+  ['all', '全部'],
+  ['1', '技术中心'],
+  ['2', '工作台'],
+  ['3', '制药台'],
+  ['4', '防具台'],
+];
 
 function money(value: unknown) {
   return new Intl.NumberFormat('zh-CN').format(Math.round(Number(value) || 0));
@@ -96,9 +103,7 @@ function App() {
   const [sortKey, setSortKey] = useState<SortKey>('hourlyProfit');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
-  async function loadRankings() {
-    const res = await fetch(apiUrl('/api/rankings'));
-    const data = await res.json() as RankingsResponse;
+  async function applyResponse(data: RankingsResponse) {
     if (data.ok && data.rows) {
       setRows(data.rows);
       setErrors(data.errors || []);
@@ -106,20 +111,26 @@ function App() {
     }
   }
 
+  async function loadRankings() {
+    const res = await fetch(apiUrl('/api/rankings'));
+    const data = await res.json() as RankingsResponse;
+    await applyResponse(data);
+  }
+
   async function refresh() {
     setStatus('刷新中...');
-    const res = await fetch(apiUrl('/api/refresh'), { method: 'POST' });
-    const data = await res.json() as RankingsResponse;
-    if (!data.ok) {
-      setStatus(data.error || '刷新失败');
-      return;
+    try {
+      const res = await fetch(apiUrl('/api/refresh'), { method: 'POST' });
+      const data = await res.json() as RankingsResponse;
+      if (!data.ok) {
+        setStatus(data.error || '刷新失败');
+        return;
+      }
+      await applyResponse(data);
+      setStatus(data.refreshing ? '已有刷新正在进行' : data.coolingDown ? '已使用最近数据' : '已刷新');
+    } catch {
+      setStatus('刷新失败');
     }
-    if (data.rows) {
-      setRows(data.rows);
-      setErrors(data.errors || []);
-      setUpdatedAt(data.updatedAt || Date.now());
-    }
-    setStatus(data.refreshing ? '已有刷新正在进行' : data.coolingDown ? '已使用最近数据' : '已刷新');
   }
 
   useEffect(() => {
@@ -181,13 +192,7 @@ function App() {
         </div>
         <div className="controls">
           <div className="segmented">
-            {[
-              ['all', '全部'],
-              ['1', '技术中心'],
-              ['2', '工作台'],
-              ['3', '制药台'],
-              ['4', '防具台'],
-            ].map(([value, label]) => (
+            {stationOptions.map(([value, label]) => (
               <button key={value} className={station === value ? 'active' : ''} onClick={() => setStation(value)}>{label}</button>
             ))}
           </div>
