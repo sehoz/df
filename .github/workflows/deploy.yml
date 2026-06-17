@@ -35,16 +35,18 @@ jobs:
       - name: Install CloudBase CLI
         run: npm install -g @cloudbase/cli
 
-      - name: Deploy backend function
-        run: tcb fn deploy df-api --dir backend --force --envId "$TCB_ENV_ID" --secretId "$TENCENT_SECRET_ID" --secretKey "$TENCENT_SECRET_KEY"
+      - name: Login CloudBase CLI
+        run: tcb login --apiKeyId "$TENCENT_SECRET_ID" --apiKey "$TENCENT_SECRET_KEY"
         env:
-          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
           TENCENT_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
           TENCENT_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
 
-      - name: Deploy frontend hosting
-        run: tcb hosting deploy frontend/dist / --envId "$TCB_ENV_ID" --secretId "$TENCENT_SECRET_ID" --secretKey "$TENCENT_SECRET_KEY"
+      - name: Deploy backend function
+        run: tcb fn deploy df-api --dir backend --force --httpFn --path /api --env-id "$TCB_ENV_ID"
         env:
           TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
-          TENCENT_SECRET_ID: ${{ secrets.TENCENT_SECRET_ID }}
-          TENCENT_SECRET_KEY: ${{ secrets.TENCENT_SECRET_KEY }}
+
+      - name: Deploy frontend hosting
+        run: tcb hosting deploy frontend/dist / --env-id "$TCB_ENV_ID"
+        env:
+          TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}

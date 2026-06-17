@@ -1,0 +1,12 @@
+{
+  "$schema": "https://static.cloudbase.net/cli/cloudbaserc.schema.json",
+  "envId": "{{env.TCB_ENV_ID}}",
+  "functions": [
+    {
+      "name": "df-api",
+      "timeout": 30,
+      "memorySize": 256,
+      "runtime": "Nodejs20.19"
+    }
+  ]
+}
