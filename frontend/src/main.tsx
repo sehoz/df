@@ -2,6 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 
+const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+
+function apiUrl(path: string) {
+  return `${API_BASE_URL}${path}`;
+}
+
 type SortKey = 'profit' | 'hourlyProfit' | 'outputNetValue' | 'hourlyOutputValue';
 type SortDir = 'asc' | 'desc';
 
@@ -91,7 +97,7 @@ function App() {
   const [sortDir, setSortDir] = useState<SortDir>('desc');
 
   async function loadRankings() {
-    const res = await fetch('/api/rankings');
+    const res = await fetch(apiUrl('/api/rankings'));
     const data = await res.json() as RankingsResponse;
     if (data.ok && data.rows) {
       setRows(data.rows);
@@ -102,7 +108,7 @@ function App() {
 
   async function refresh() {
     setStatus('刷新中...');
-    const res = await fetch('/api/refresh', { method: 'POST' });
+    const res = await fetch(apiUrl('/api/refresh'), { method: 'POST' });
     const data = await res.json() as RankingsResponse;
     if (!data.ok) {
       setStatus(data.error || '刷新失败');
