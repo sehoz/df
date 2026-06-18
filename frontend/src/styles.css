@@ -85,12 +85,8 @@ tbody tr:hover .sorted-col { background: #eef5ff; }
 .mobile-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; margin-top: 6px; }
 .mobile-metric { min-width: 0; display: flex; align-items: baseline; gap: 2px; padding: 2px 3px; border-radius: 5px; border: 1px solid transparent; }
 .mobile-metric.active { background: #eef5ff; border-color: #c9dcff; }
-.mobile-metric.profit-good { background: #f0fdf4; border-color: #bbf7d0; }
-.mobile-metric.profit-bad { background: #fff7ed; border-color: #fed7aa; }
-.mobile-metric.profit-good.active { background: #dcfce7; border-color: #86efac; }
-.mobile-metric.profit-bad.active { background: #ffedd5; border-color: #fdba74; }
 .mobile-metric span { color: var(--muted); font-size: 10px; line-height: 1.05; flex: 0 0 auto; }
-.mobile-metric strong { min-width: 0; color: var(--text); font-size: 11px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mobile-metric strong { min-width: 0; font-size: 11px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mobile-costs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; color: var(--muted); font-size: 10.5px; margin-top: 3px; padding: 0 4px; }
 .mobile-costs span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .best-grid-section { margin-bottom: 12px; }

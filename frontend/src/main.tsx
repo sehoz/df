@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const APP_BUILD_ID = 'mobile-header-tools-20260618-2';
+const APP_BUILD_ID = 'mobile-profit-text-20260618-1';
 
 function apiUrl(path: string) {
   return `${API_BASE_URL}${path}`;
@@ -322,11 +322,11 @@ function App() {
               </div>
             </div>
             <div className="mobile-metrics">
-              <div className={`mobile-metric ${row.profit >= 0 ? 'profit-good' : 'profit-bad'} ${sortKey === 'profit' ? 'active' : ''}`}>
+              <div className={`mobile-metric ${sortKey === 'profit' ? 'active' : ''}`}>
                 <span>总净</span>
                 <strong className={row.profit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.profit)}</strong>
               </div>
-              <div className={`mobile-metric ${row.hourlyProfit >= 0 ? 'profit-good' : 'profit-bad'} ${sortKey === 'hourlyProfit' ? 'active' : ''}`}>
+              <div className={`mobile-metric ${sortKey === 'hourlyProfit' ? 'active' : ''}`}>
                 <span>时净</span>
                 <strong className={row.hourlyProfit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.hourlyProfit)}</strong>
               </div>
