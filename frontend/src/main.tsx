@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const APP_BUILD_ID = 'mobile-dense-ranking-20260618-3';
+const APP_BUILD_ID = 'mobile-header-tools-20260618-1';
 
 function apiUrl(path: string) {
   return `${API_BASE_URL}${path}`;
@@ -189,26 +189,28 @@ function App() {
   return (
     <main className="app">
       <header className="topbar">
-        <div>
+        <div className="title-block">
           <div className="eyebrow">三角洲行动 · 默认 L3 满级</div>
           <h1>特勤处制造收益排行</h1>
         </div>
-        <div className="status">{status}</div>
+        <div className="header-tools">
+          <div className="status">{status}</div>
+          <div className="action-row">
+            <button className="button" onClick={refresh}>刷新数据</button>
+            <span className="last-updated">更新时间：{fmtTime(updatedAt)}</span>
+          </div>
+          <div className="search-row">
+            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="搜索制造物名称" />
+          </div>
+        </div>
       </header>
 
       <section className="panel settings">
-        <div className="action-row">
-          <button className="button" onClick={refresh}>刷新数据</button>
-          <span className="last-updated">更新时间：{fmtTime(updatedAt)}</span>
-        </div>
         <div className="controls desktop-controls">
           <div className="segmented">
             {stationOptions.map(([value, label]) => (
               <button key={value} className={station === value ? 'active' : ''} onClick={() => setStation(value)}>{label}</button>
             ))}
-          </div>
-          <div className="search-row">
-            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="搜索制造物名称" />
           </div>
         </div>
       </section>
