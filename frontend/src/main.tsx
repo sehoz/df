@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const APP_BUILD_ID = 'mobile-profit-text-20260618-1';
+const APP_BUILD_ID = 'mobile-profit-number-20260618-1';
 
 function apiUrl(path: string) {
   return `${API_BASE_URL}${path}`;

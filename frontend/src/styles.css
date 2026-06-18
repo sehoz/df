@@ -87,6 +87,8 @@ tbody tr:hover .sorted-col { background: #eef5ff; }
 .mobile-metric.active { background: #eef5ff; border-color: #c9dcff; }
 .mobile-metric span { color: var(--muted); font-size: 10px; line-height: 1.05; flex: 0 0 auto; }
 .mobile-metric strong { min-width: 0; font-size: 11px; line-height: 1.15; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mobile-metric strong.positive { color: #0f7a35; font-weight: 800; }
+.mobile-metric strong.negative { color: #d2321f; font-weight: 800; }
 .mobile-costs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; color: var(--muted); font-size: 10.5px; margin-top: 3px; padding: 0 4px; }
 .mobile-costs span { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .best-grid-section { margin-bottom: 12px; }
