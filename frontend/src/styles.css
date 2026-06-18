@@ -100,6 +100,7 @@ tbody tr:hover .sorted-col { background: #eef5ff; }
 .station-best-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 12px; margin-bottom: 10px; }
 .station-best-head strong { color: var(--accent); font-size: 16px; white-space: nowrap; }
 .station-best-item { display: flex; align-items: center; gap: 9px; min-width: 0; }
+.station-best-item > div:last-child { min-width: 0; max-width: 100%; }
 .station-best-item .name-main { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mobile-sort-panel { display: none; }
 .mobile-sort-title { color: var(--muted); font-size: 12px; font-weight: 700; }
@@ -210,8 +211,8 @@ tbody tr:hover .sorted-col { background: #eef5ff; }
   .station-best-head strong { font-size: 15px; }
   .station-best-item { gap: 7px; }
   .station-best-item .name-main { font-size: 13px; }
-  .station-best-item .name-main.name-sm { font-size: 11.5px; }
-  .station-best-item .name-main.name-xs { font-size: 10.5px; }
+  .station-best-item .name-main.name-sm { font-size: 11px; }
+  .station-best-item .name-main.name-xs { font-size: 9.5px; letter-spacing: -0.1px; }
   .station-best-item .muted { font-size: 11px; }
   .mobile-card-head { min-width: 0; }
 }
@@ -227,8 +228,6 @@ tbody tr:hover .sorted-col { background: #eef5ff; }
   .mobile-row-main { grid-template-columns: 24px 32px minmax(0, 1fr); gap: 7px; }
   .mobile-row .item-icon-frame { width: 32px; height: 32px; flex-basis: 32px; }
   .mobile-row .item-icon { width: 28px; height: 28px; }
-  .mobile-name-block .name-main.name-sm { font-size: 12px; }
-  .mobile-name-block .name-main.name-xs { font-size: 11px; }
   .mobile-metrics { gap: 2px; }
   .mobile-metric { padding: 2px 3px; }
   .mobile-metric strong { font-size: 10.5px; }

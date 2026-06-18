@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const APP_BUILD_ID = 'mobile-profit-number-20260618-1';
+const APP_BUILD_ID = 'station-name-fit-20260618-1';
 
 function apiUrl(path: string) {
   return `${API_BASE_URL}${path}`;
@@ -83,8 +83,8 @@ function marketPrice(row: ManufactureRow) {
 }
 
 function nameClass(name: string) {
-  if (name.length >= 22) return 'name-main name-xs';
-  if (name.length >= 17) return 'name-main name-sm';
+  if (name.length >= 20) return 'name-main name-xs';
+  if (name.length >= 16) return 'name-main name-sm';
   return 'name-main';
 }
 
@@ -294,7 +294,7 @@ function App() {
             ) : sorted.map((row) => (
               <tr key={row.key}>
                 <td>{row.rank}</td>
-                <td><div className="name-cell"><ItemIcon row={row} /><div className={nameClass(row.name)}>{row.name}</div></div></td>
+                <td><div className="name-cell"><ItemIcon row={row} /><div className="name-main">{row.name}</div></div></td>
                 <td><span className="pill">{row.stationName}</span></td>
                 <td className={`${row.profit >= 0 ? 'positive' : 'negative'}${sortClass('profit')}`}>{moneySigned(row.profit)}</td>
                 <td className={`${row.hourlyProfit >= 0 ? 'positive' : 'negative'}${sortClass('hourlyProfit')}`}>{moneySigned(row.hourlyProfit)}</td>
@@ -317,7 +317,7 @@ function App() {
               <div className="mobile-rank">{row.rank}</div>
               <ItemIcon row={row} />
               <div className="mobile-name-block">
-                <div className={nameClass(row.name)}>{row.name}</div>
+                <div className="name-main">{row.name}</div>
                 <div className="mobile-meta">{row.stationName} · {row.period || '-'} h</div>
               </div>
             </div>
