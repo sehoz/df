@@ -101,7 +101,7 @@ tbody tr:hover .sorted-col { background: #eef5ff; }
 .station-best-head strong { color: var(--accent); font-size: 16px; white-space: nowrap; }
 .station-best-item { display: flex; align-items: center; gap: 9px; min-width: 0; }
 .station-best-item > div:last-child { min-width: 0; max-width: 100%; }
-.station-best-item .name-main { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.station-best-item .name-main { display: block; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mobile-sort-panel { display: none; }
 .mobile-sort-title { color: var(--muted); font-size: 12px; font-weight: 700; }
 .mobile-sort-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
