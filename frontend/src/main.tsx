@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const APP_BUILD_ID = 'mobile-header-tools-20260618-1';
+const APP_BUILD_ID = 'mobile-header-tools-20260618-2';
 
 function apiUrl(path: string) {
   return `${API_BASE_URL}${path}`;
@@ -80,6 +80,12 @@ function fmtTime(ts?: number) {
 
 function marketPrice(row: ManufactureRow) {
   return Number(row.saleGross ?? row.outputGrossValue ?? 0) || 0;
+}
+
+function nameClass(name: string) {
+  if (name.length >= 22) return 'name-main name-xs';
+  if (name.length >= 17) return 'name-main name-sm';
+  return 'name-main';
 }
 
 function quality(row: ManufactureRow) {
@@ -190,17 +196,18 @@ function App() {
     <main className="app">
       <header className="topbar">
         <div className="title-block">
-          <div className="eyebrow">三角洲行动 · 默认 L3 满级</div>
           <h1>特勤处制造收益排行</h1>
         </div>
         <div className="header-tools">
-          <div className="status">{status}</div>
-          <div className="action-row">
+          <div className="header-tool-left">
+            <div className="status">{status}</div>
             <button className="button" onClick={refresh}>刷新数据</button>
-            <span className="last-updated">更新时间：{fmtTime(updatedAt)}</span>
           </div>
-          <div className="search-row">
-            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="搜索制造物名称" />
+          <div className="header-tool-right">
+            <span className="last-updated">更新时间：{fmtTime(updatedAt)}</span>
+            <div className="search-row">
+              <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="搜索制造物名称" />
+            </div>
           </div>
         </div>
       </header>
@@ -244,7 +251,7 @@ function App() {
                   <div className="station-best-item">
                     <ItemIcon row={best} />
                     <div>
-                      <div className="name-main">{best.name}</div>
+                      <div className={nameClass(best.name)}>{best.name}</div>
                       <div className="muted">{best.period || '-'} h · 材料 {money(best.materialCost)}</div>
                     </div>
                   </div>
@@ -287,7 +294,7 @@ function App() {
             ) : sorted.map((row) => (
               <tr key={row.key}>
                 <td>{row.rank}</td>
-                <td><div className="name-cell"><ItemIcon row={row} /><div className="name-main">{row.name}</div></div></td>
+                <td><div className="name-cell"><ItemIcon row={row} /><div className={nameClass(row.name)}>{row.name}</div></div></td>
                 <td><span className="pill">{row.stationName}</span></td>
                 <td className={`${row.profit >= 0 ? 'positive' : 'negative'}${sortClass('profit')}`}>{moneySigned(row.profit)}</td>
                 <td className={`${row.hourlyProfit >= 0 ? 'positive' : 'negative'}${sortClass('hourlyProfit')}`}>{moneySigned(row.hourlyProfit)}</td>
@@ -310,16 +317,16 @@ function App() {
               <div className="mobile-rank">{row.rank}</div>
               <ItemIcon row={row} />
               <div className="mobile-name-block">
-                <div className="name-main">{row.name}</div>
+                <div className={nameClass(row.name)}>{row.name}</div>
                 <div className="mobile-meta">{row.stationName} · {row.period || '-'} h</div>
               </div>
             </div>
             <div className="mobile-metrics">
-              <div className={`mobile-metric ${sortKey === 'profit' ? 'active' : ''}`}>
+              <div className={`mobile-metric ${row.profit >= 0 ? 'profit-good' : 'profit-bad'} ${sortKey === 'profit' ? 'active' : ''}`}>
                 <span>总净</span>
                 <strong className={row.profit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.profit)}</strong>
               </div>
-              <div className={`mobile-metric ${sortKey === 'hourlyProfit' ? 'active' : ''}`}>
+              <div className={`mobile-metric ${row.hourlyProfit >= 0 ? 'profit-good' : 'profit-bad'} ${sortKey === 'hourlyProfit' ? 'active' : ''}`}>
                 <span>时净</span>
                 <strong className={row.hourlyProfit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.hourlyProfit)}</strong>
               </div>
