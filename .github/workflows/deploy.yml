@@ -50,6 +50,9 @@ jobs:
           TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}
 
       - name: Deploy frontend hosting
-        run: tcb hosting deploy frontend/dist /df --env-id "$TCB_ENV_ID"
+        run: |
+          tcb hosting deploy frontend/dist /df --env-id "$TCB_ENV_ID"
+          tcb hosting delete index.html --env-id "$TCB_ENV_ID" --yes || true
+          tcb hosting delete manifest.webmanifest --env-id "$TCB_ENV_ID" --yes || true
         env:
           TCB_ENV_ID: ${{ secrets.TCB_ENV_ID }}

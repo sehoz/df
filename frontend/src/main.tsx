@@ -55,6 +55,8 @@ const stationOptions = [
   ['4', '防具台'],
 ];
 
+const stationCards = stationOptions.filter(([value]) => value !== 'all');
+
 function money(value: unknown) {
   return new Intl.NumberFormat('zh-CN').format(Math.round(Number(value) || 0));
 }
@@ -62,6 +64,11 @@ function money(value: unknown) {
 function moneySigned(value: unknown) {
   const n = Math.round(Number(value) || 0);
   return `${n >= 0 ? '+' : ''}${money(n)}`;
+}
+
+function valueText(row: ManufactureRow | undefined, key: SortKey) {
+  if (!row) return '-';
+  return key === 'profit' || key === 'hourlyProfit' ? moneySigned(row[key]) : money(row[key]);
 }
 
 function fmtTime(ts?: number) {
@@ -141,7 +148,7 @@ function App() {
     const q = search.trim().toLowerCase();
     return rows.filter((row) => {
       if (station !== 'all' && String(row.station) !== station) return false;
-      if (q && ![row.name, row.stationName].join(' ').toLowerCase().includes(q)) return false;
+      if (q && !row.name.toLowerCase().includes(q)) return false;
       return true;
     });
   }, [rows, station, search]);
@@ -157,6 +164,11 @@ function App() {
   }, [filtered, sortKey, sortDir]);
 
   const bestBy = (key: SortKey) => [...filtered].sort((a, b) => (Number(b[key]) || 0) - (Number(a[key]) || 0))[0];
+  const stationBests = stationCards.map(([value, label]) => {
+    const list = rows.filter((row) => String(row.station) === value);
+    const best = [...list].sort((a, b) => (Number(b[sortKey]) || 0) - (Number(a[sortKey]) || 0))[0];
+    return { value, label, best };
+  });
   const stats = [
     { label: '总条目', value: rows.length, sub: `${filtered.length} 条在当前筛选中` },
     { label: '最佳每小时净收益', value: bestBy('hourlyProfit') ? moneySigned(bestBy('hourlyProfit').hourlyProfit) : '-', sub: bestBy('hourlyProfit')?.name || '-' },
@@ -197,7 +209,18 @@ function App() {
             ))}
           </div>
           <div className="search-row">
-            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="搜索物品、台子" />
+            <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="搜索制造物名称" />
+          </div>
+        </div>
+        <div className="mobile-sort-panel">
+          <div className="mobile-sort-title">排序指标</div>
+          <div className="mobile-sort-grid">
+            {(Object.keys(sortLabels) as SortKey[]).map((key) => (
+              <button key={key} className={sortKey === key ? 'active' : ''} onClick={() => onSort(key)}>
+                {sortLabels[key]}
+                <span>{sortKey === key ? (sortDir === 'desc' ? '从大到小' : '从小到大') : '点击排序'}</span>
+              </button>
+            ))}
           </div>
         </div>
       </section>
@@ -210,6 +233,31 @@ function App() {
             <div className="sub">{item.sub}</div>
           </div>
         ))}
+      </section>
+
+      <section className="best-grid-section">
+        <div className="section-title">各制造台最优 · {sortLabels[sortKey]}</div>
+        <div className="station-best-grid">
+          {stationBests.map(({ value, label, best }) => (
+            <button key={value} className="station-best-card" onClick={() => setStation(value)}>
+              <div className="station-best-head">
+                <span>{label}</span>
+                <strong>{valueText(best, sortKey)}</strong>
+              </div>
+              {best ? (
+                <div className="station-best-item">
+                  <ItemIcon row={best} />
+                  <div>
+                    <div className="name-main">{best.name}</div>
+                    <div className="muted">{best.period || '-'} h · 材料 {money(best.materialCost)}</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="muted">暂无数据</div>
+              )}
+            </button>
+          ))}
+        </div>
       </section>
 
       {errors.length > 0 && <section className="error-box">接口异常 {errors.length} 个</section>}
@@ -229,12 +277,11 @@ function App() {
               <th>材料成本</th>
               <th>产出到手价</th>
               <th>手续费</th>
-              <th>更新时间</th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 ? (
-              <tr><td colSpan={12} className="muted">没有可显示的数据。</td></tr>
+              <tr><td colSpan={11} className="muted">没有可显示的数据。</td></tr>
             ) : sorted.map((row) => (
               <tr key={row.key}>
                 <td>{row.rank}</td>
@@ -248,7 +295,6 @@ function App() {
                 <td>{money(row.materialCost)}</td>
                 <td>{money(row.outputNetValue)}</td>
                 <td>{money(row.listingFee)}</td>
-                <td className="muted">{fmtTime(row.updatedAt)}</td>
               </tr>
             ))}
           </tbody>
@@ -267,7 +313,7 @@ function App() {
             </div>
             <div className="mobile-grid">
               <span>净收益 <strong className={row.profit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.profit)}</strong></span>
-              <span>每小时 <strong className={row.hourlyProfit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.hourlyProfit)}</strong></span>
+              <span>每小时净收益 <strong className={row.hourlyProfit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.hourlyProfit)}</strong></span>
               <span>总产出 <strong>{money(row.outputNetValue)}</strong></span>
               <span>每小时产出 <strong>{money(row.hourlyOutputValue)}</strong></span>
             </div>
