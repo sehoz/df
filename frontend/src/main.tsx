@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
-const APP_BUILD_ID = 'mobile-sticky-controls-20260618-1';
+const APP_BUILD_ID = 'mobile-dense-ranking-20260618-3';
 
 function apiUrl(path: string) {
   return `${API_BASE_URL}${path}`;
@@ -21,6 +21,8 @@ interface ManufactureRow {
   qualityKey: string;
   iconUrl: string;
   period: number;
+  saleGross?: number;
+  outputGrossValue?: number;
   profit: number;
   hourlyProfit: number;
   outputNetValue: number;
@@ -74,6 +76,10 @@ function valueText(row: ManufactureRow | undefined, key: SortKey) {
 
 function fmtTime(ts?: number) {
   return ts ? new Date(ts).toLocaleString('zh-CN', { hour12: false }) : '-';
+}
+
+function marketPrice(row: ManufactureRow) {
+  return Number(row.saleGross ?? row.outputGrossValue ?? 0) || 0;
 }
 
 function quality(row: ManufactureRow) {
@@ -223,11 +229,6 @@ function App() {
       </section>
 
       <section className="summary-grid">
-        <div className="stat total-stat">
-          <div className="label">总条目</div>
-          <div className="value">{rows.length}</div>
-          <div className="sub">{filtered.length} 条在当前筛选中</div>
-        </div>
         <div className="best-grid-section">
           <div className="section-title">各制造台最优 · {sortLabels[sortKey]}</div>
           <div className="station-best-grid">
@@ -256,6 +257,11 @@ function App() {
 
       {errors.length > 0 && <section className="error-box">接口异常 {errors.length} 个</section>}
 
+      <section className="mobile-rank-divider">
+        <span>制造排行</span>
+        <strong>{sortLabels[sortKey]} {sortDir === 'desc' ? '从高到低' : '从低到高'}</strong>
+      </section>
+
       <section className="panel table-wrap">
         <table>
           <thead>
@@ -268,13 +274,14 @@ function App() {
               <th><SortButton sortKey="outputNetValue" currentKey={sortKey} dir={sortDir} onSort={onSort} /></th>
               <th><SortButton sortKey="hourlyOutputValue" currentKey={sortKey} dir={sortDir} onSort={onSort} /></th>
               <th>时长</th>
+              <th>交易行价格</th>
               <th>材料成本</th>
               <th>手续费</th>
             </tr>
           </thead>
           <tbody>
             {sorted.length === 0 ? (
-              <tr><td colSpan={10} className="muted">没有可显示的数据。</td></tr>
+              <tr><td colSpan={11} className="muted">没有可显示的数据。</td></tr>
             ) : sorted.map((row) => (
               <tr key={row.key}>
                 <td>{row.rank}</td>
@@ -285,6 +292,7 @@ function App() {
                 <td className={sortClass('outputNetValue')}>{money(row.outputNetValue)}</td>
                 <td className={sortClass('hourlyOutputValue')}>{money(row.hourlyOutputValue)}</td>
                 <td>{row.period || '-'} h</td>
+                <td>{money(marketPrice(row))}</td>
                 <td>{money(row.materialCost)}</td>
                 <td>{money(row.listingFee)}</td>
               </tr>
@@ -295,19 +303,37 @@ function App() {
 
       <section className="mobile-list">
         {sorted.map((row) => (
-          <article className="mobile-card" key={row.key}>
-            <div className="mobile-card-head">
+          <article className="mobile-row" key={row.key}>
+            <div className="mobile-row-main">
+              <div className="mobile-rank">{row.rank}</div>
               <ItemIcon row={row} />
-              <div>
+              <div className="mobile-name-block">
                 <div className="name-main">{row.name}</div>
-                <div className="muted">{row.stationName} · {row.period || '-'} h</div>
+                <div className="mobile-meta">{row.stationName} · {row.period || '-'} h</div>
               </div>
             </div>
-            <div className="mobile-grid">
-              <span>总净收益 <strong className={row.profit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.profit)}</strong></span>
-              <span>每小时净收益 <strong className={row.hourlyProfit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.hourlyProfit)}</strong></span>
-              <span>总产出 <strong>{money(row.outputNetValue)}</strong></span>
-              <span>每小时产出 <strong>{money(row.hourlyOutputValue)}</strong></span>
+            <div className="mobile-metrics">
+              <div className={`mobile-metric ${sortKey === 'profit' ? 'active' : ''}`}>
+                <span>总净</span>
+                <strong className={row.profit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.profit)}</strong>
+              </div>
+              <div className={`mobile-metric ${sortKey === 'hourlyProfit' ? 'active' : ''}`}>
+                <span>时净</span>
+                <strong className={row.hourlyProfit >= 0 ? 'positive' : 'negative'}>{moneySigned(row.hourlyProfit)}</strong>
+              </div>
+              <div className={`mobile-metric ${sortKey === 'outputNetValue' ? 'active' : ''}`}>
+                <span>总产</span>
+                <strong>{money(row.outputNetValue)}</strong>
+              </div>
+              <div className={`mobile-metric ${sortKey === 'hourlyOutputValue' ? 'active' : ''}`}>
+                <span>时产</span>
+                <strong>{money(row.hourlyOutputValue)}</strong>
+              </div>
+            </div>
+            <div className="mobile-costs">
+              <span>交易行 {money(marketPrice(row))}</span>
+              <span>材料 {money(row.materialCost)}</span>
+              <span>手续费 {money(row.listingFee)}</span>
             </div>
           </article>
         ))}
