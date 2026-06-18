@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import './styles.css';
 
 const API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
+const APP_BUILD_ID = 'mobile-sticky-controls-20260618-1';
 
 function apiUrl(path: string) {
   return `${API_BASE_URL}${path}`;
@@ -194,7 +195,7 @@ function App() {
           <button className="button" onClick={refresh}>刷新数据</button>
           <span className="last-updated">更新时间：{fmtTime(updatedAt)}</span>
         </div>
-        <div className="controls">
+        <div className="controls desktop-controls">
           <div className="segmented">
             {stationOptions.map(([value, label]) => (
               <button key={value} className={station === value ? 'active' : ''} onClick={() => setStation(value)}>{label}</button>
@@ -204,16 +205,20 @@ function App() {
             <input value={search} onChange={(event) => setSearch(event.target.value)} type="search" placeholder="搜索制造物名称" />
           </div>
         </div>
-        <div className="mobile-sort-panel">
-          <div className="mobile-sort-title">排序指标</div>
-          <div className="mobile-sort-grid">
-            {(Object.keys(sortLabels) as SortKey[]).map((key) => (
-              <button key={key} className={sortKey === key ? 'active' : ''} onClick={() => onSort(key)}>
-                {sortLabels[key]}
-                <span>{sortKey === key ? (sortDir === 'desc' ? '从大到小' : '从小到大') : '点击排序'}</span>
-              </button>
-            ))}
-          </div>
+      </section>
+
+      <section className="mobile-sticky-controls" aria-label="移动端筛选和排序">
+        <div className="mobile-chip-row">
+          {stationOptions.map(([value, label]) => (
+            <button key={value} className={station === value ? 'active' : ''} onClick={() => setStation(value)}>{label}</button>
+          ))}
+        </div>
+        <div className="mobile-chip-row sort-row">
+          {(Object.keys(sortLabels) as SortKey[]).map((key) => (
+            <button key={key} className={sortKey === key ? 'active' : ''} data-dir={sortKey === key ? sortDir : ''} onClick={() => onSort(key)}>
+              {sortLabels[key]}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -312,3 +317,4 @@ function App() {
 }
 
 createRoot(document.getElementById('root')!).render(<App />);
+document.documentElement.dataset.appBuild = APP_BUILD_ID;
